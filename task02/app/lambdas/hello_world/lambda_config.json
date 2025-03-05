@@ -14,14 +14,8 @@
   "publish_version": true,
   "alias": "${lambdas_alias_name}",
   "url_config": {
-    "auth_type": "NONE",  
-    "cors": {
-      "allow_credentials": false,
-      "allow_headers": ["*"],
-      "allow_methods": ["GET"],
-      "allow_origins": ["*"]
-    }
-  },
+    "auth_type": "NONE"
+ },
   "ephemeral_storage": 512,
   "tags": {}
 }
