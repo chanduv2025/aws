@@ -68,6 +68,8 @@
     }
   },
   "hello-world-lambda": {
+    "name": "hello-world-lambda",
+    "version": "v1",  
     "resource_type": "lambda",
     "handler": "app/lambdas/hello_world/index.handler",
     "runtime": "nodejs18.x",
