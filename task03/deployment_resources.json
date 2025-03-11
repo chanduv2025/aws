@@ -68,15 +68,15 @@
     }
   },
   "hello-world-lambda": {
-    "func_name": "hello-world-lambda", 
+    "func_name": "hello-world-lambda",
     "version": "v1",
     "resource_type": "lambda",
     "handler": "app/lambdas/hello_world/index.handler",
     "runtime": "nodejs18.x",
-    "memory": 128,  
+    "memory": 128,
     "timeout": 10,
-    "iam_role_name": "my-lambda-role",  
-    "s3_path": "s3://my-lambda-bucket/hello-world.zip",  
+    "iam_role_name": "my-lambda-role",
+    "s3_path": "./build/hello-world.zip", 
     "environment_variables": {
       "STAGE": "dev"
     },
