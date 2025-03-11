@@ -26,73 +26,30 @@
     "tags": {}
   },
   
-  "HelloLambdaFunction": {
-    "name": "HelloLambdaFunction",              
-    "version": "1.0",  
-    "resource_type": "lambda",
-    "handler": "app/lambdas/hello_world/index.handler",
-    "runtime": "nodejs18.x",
-    "role": "arn:aws:iam::890742610830:role/HelloLambdaExecutionRole",
-    "code": {
-      "path": "app/lambdas/hello_world"
-    },
-    "memory_size": 128,
-    "timeout": 10,
-    "tags": {
-      "Environment": "Production",
-      "Project": "HelloAPI"
-    }
-  },
-
-  "HelloApi": {
+  "my-api": {
     "resource_type": "api_gateway",
-    "deploy_stage": "prod",
+    "deploy_stage": "dev",
     "dependencies": [
       {
-        "resource_name": "HelloLambdaFunction",
+        "resource_name": "hello-world-lambda",
         "resource_type": "lambda"
       }
     ],
+    "authorizers": [],
     "resources": {
-      "hello": {
-        "resource_type": "api_gateway_resource",
-        "path": "/hello",
-        "methods": {
-          "GET": {
-            "authorization": "NONE",
-            "integration": {
-              "type": "AWS_PROXY",
-              "http_method": "POST",
-              "uri": {
-                "Fn::Sub": [
-                  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations",
-                  {
-                    "LambdaFunction": {
-                      "Ref": "HelloLambdaFunction"
-                    }
-                  }
-                ]
-              }
-            },
-            "responses": {
-              "200": {
-                "description": "Successful response",
-                "response_models": {
-                  "application/json": "Empty"
-                }
-              }
-            }
-          }
+      "/hello": {
+        "get": {
+          "lambda": "hello-world-lambda"
         }
       }
     },
     "minimum_compression_size": 1024,
     "cluster_cache_configuration": {
-      "policy_statement_singleton": false,
-      "cache_enabled": false,
+      "policy_statement_singleton": true,
+      "cache_enabled": true,
       "cache_size": 0.5,
-      "cache_ttl_sec": 300,
-      "encrypt_cache_data": false
+      "cache_ttl_sec": 3600,
+      "encrypt_cache_data": true
     },
     "cluster_throttling_configuration": {
       "throttling_enabled": true,
@@ -106,8 +63,22 @@
       "detailed_metrics": true
     },
     "tags": {
-      "Environment": "Production",
-      "Project": "HelloAPI"
+      "Environment": "dev",
+      "Project": "my-lambda-project"
+    }
+  },
+  "hello-world-lambda": {
+    "resource_type": "lambda",
+    "handler": "app/lambdas/hello_world/index.handler",
+    "runtime": "nodejs18.x",
+    "memory_size": 128,
+    "timeout": 10,
+    "environment_variables": {
+      "STAGE": "dev"
+    },
+    "tags": {
+      "Environment": "dev",
+      "Project": "my-lambda-project"
     }
   }
 }
