@@ -31,7 +31,7 @@
     "dependencies": [],
     "resources": {
       "/hello": {
-        "enable_cors": false,
+        "enable_cors": true,
         "GET": {
           "authorization_type": "NONE",
           "integration_type": "lambda",
