@@ -25,64 +25,27 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
-  
-  "my-api": {
+  "task3_api": {
     "resource_type": "api_gateway",
-    "deploy_stage": "dev",
-    "dependencies": [
-      {
-        "resource_name": "hello-world-lambda",
-        "resource_type": "lambda"
-      }
-    ],
-    "authorizers": [],
+    "deploy_stage": "api",
+    "dependencies": [],
     "resources": {
       "/hello": {
-        "get": {
-          "lambda": "hello-world-lambda"
+        "enable_cors": false,
+        "GET": {
+          "authorization_type": "NONE",
+          "integration_type": "lambda",
+          "lambda_name": "hello_world",
+          "api_key_required": false,
+          "method_request_parameters": {},
+          "integration_request_body_template": {},
+          "responses": [],
+          "integration_responses": [],
+          "default_error_pattern": true,
+          "enable_proxy": true
         }
       }
     },
-    "minimum_compression_size": 1024,
-    "cluster_cache_configuration": {
-      "policy_statement_singleton": true,
-      "cache_enabled": true,
-      "cache_size": 0.5,
-      "cache_ttl_sec": 3600,
-      "encrypt_cache_data": true
-    },
-    "cluster_throttling_configuration": {
-      "throttling_enabled": true,
-      "throttling_rate_limit": 10.0,
-      "throttling_burst_limit": 20
-    },
-    "logging_configuration": {
-      "logging_enabled": true,
-      "log_level": "INFO",
-      "data_tracing": true,
-      "detailed_metrics": true
-    },
-    "tags": {
-      "Environment": "dev",
-      "Project": "my-lambda-project"
-    }
-  },
-  "hello-world-lambda": {
-    "func_name": "hello-world-lambda",
-    "version": "v1",
-    "resource_type": "lambda",
-    "handler": "app/lambdas/hello_world/index.handler",
-    "runtime": "nodejs18.x",
-    "memory": 128,
-    "timeout": 10,
-    "iam_role_name": "my-lambda-role",
-    "s3_path": "./build/hello-world.zip", 
-    "environment_variables": {
-      "STAGE": "dev"
-    },
-    "tags": {
-      "Environment": "dev",
-      "Project": "my-lambda-project"
-    }
+    "tags": {}
   }
 }
