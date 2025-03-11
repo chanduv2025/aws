@@ -31,7 +31,7 @@
     "version": "1.0",  
     "resource_type": "lambda",
     "handler": "app/lambdas/hello_world/index.handler",
-    "runtime": "nodejs",
+    "runtime": "nodejs18.x",
     "role": "arn:aws:iam::890742610830:role/HelloLambdaExecutionRole",
     "code": {
       "path": "app/lambdas/hello_world"
