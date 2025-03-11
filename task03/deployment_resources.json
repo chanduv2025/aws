@@ -25,12 +25,84 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
+  
+  "HelloLambdaFunction": {
+    "resource_type": "lambda",
+    "handler": "app/lambdas/hello_world/index.handler",
+    "runtime": "nodejs18.x",
+    "role": "arn:aws:iam::890742610830:role/HelloLambdaExecutionRole",
+    "code": {
+      "path": "app/lambdas/hello_world"
+    },
+    "memory_size": 128,
+    "timeout": 10,
+    "tags": {
+      "Environment": "Production",
+      "Project": "HelloAPI"
+    }
+  },
+
   "HelloApi": {
     "resource_type": "api_gateway",
     "deploy_stage": "prod",
-    "dependencies": [],
-    "resources": {},
+    "dependencies": [
+      {
+        "resource_name": "HelloLambdaFunction",
+        "resource_type": "lambda"
+      }
+    ],
+    "resources": {
+      "hello": {
+        "resource_type": "api_gateway_resource",
+        "path": "/hello",
+        "methods": {
+          "GET": {
+            "authorization": "NONE",
+            "integration": {
+              "type": "AWS_PROXY",
+              "http_method": "POST",
+              "uri": {
+                "Fn::Sub": [
+                  "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations",
+                  {
+                    "LambdaFunction": {
+                      "Ref": "HelloLambdaFunction"
+                    }
+                  }
+                ]
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Successful response",
+                "response_models": {
+                  "application/json": "Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "minimum_compression_size": 1024,
+    "cluster_cache_configuration": {
+      "policy_statement_singleton": false,
+      "cache_enabled": false,
+      "cache_size": 0.5,
+      "cache_ttl_sec": 300,
+      "encrypt_cache_data": false
+    },
+    "cluster_throttling_configuration": {
+      "throttling_enabled": true,
+      "throttling_rate_limit": 10.0,
+      "throttling_burst_limit": 20
+    },
+    "logging_configuration": {
+      "logging_enabled": true,
+      "log_level": "INFO",
+      "data_tracing": true,
+      "detailed_metrics": true
+    },
     "tags": {
       "Environment": "Production",
       "Project": "HelloAPI"
