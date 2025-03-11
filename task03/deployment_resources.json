@@ -27,9 +27,11 @@
   },
   
   "HelloLambdaFunction": {
+    "name": "HelloLambdaFunction",              
+    "version": "1.0",  
     "resource_type": "lambda",
     "handler": "app/lambdas/hello_world/index.handler",
-    "runtime": "nodejs18.x",
+    "runtime": "nodejs",
     "role": "arn:aws:iam::890742610830:role/HelloLambdaExecutionRole",
     "code": {
       "path": "app/lambdas/hello_world"
