@@ -43,7 +43,7 @@
   },
   "lambda_topic": {
     "resource_type": "sns_topic",
-    "region": "eu-central-1",
+    "region": "eu-west-1",
     "event_sources": [],
     "tags": {}
   }
