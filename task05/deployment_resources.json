@@ -10,7 +10,6 @@
             "dynamodb:GetItem",
             "dynamodb:Query",
             "dynamodb:PutItem",
-            "dynamodb:UpdateItem",
             "dynamodb:Batch*",
             "dynamodb:DeleteItem",
             "ssm:PutParameter",
@@ -26,7 +25,7 @@
     "resource_type": "iam_policy",
     "tags": {}
   },
-  "${target_table}": {
+  "Events": {
     "resource_type": "dynamodb_table",
     "hash_key_name": "id",
     "hash_key_type": "S",
@@ -45,7 +44,6 @@
         "enable_cors": false,
         "POST": {
           "authorization_type": "NONE",
-          "enable_proxy": true,
           "integration_type": "lambda",
           "lambda_name": "api_handler",
           "api_key_required": false,
@@ -53,7 +51,8 @@
           "integration_request_body_template": {},
           "responses": [],
           "integration_responses": [],
-          "default_error_pattern": true
+          "default_error_pattern": true,
+          "enable_proxy": true
         }
       }
     },

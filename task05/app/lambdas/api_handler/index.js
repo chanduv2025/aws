@@ -3,19 +3,11 @@ import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 
 const dynamoDBClient = new DynamoDBClient({ region: "eu-central-1" });
-const TABLE_NAME = process.env.TARGET_TABLE;
+const TABLE_NAME = process.env.TARGET_TABLE ;
 
 export const handler = async (event) => {
     try {
         console.log("Received event:", JSON.stringify(event, null, 2));
-
-        if (!TABLE_NAME) {
-            console.error("TABLE_NAME environment variable is not defined");
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ message: "Server configuration error: TABLE_NAME not set" })
-            };
-        }
 
         let inputEvent;
         try {
@@ -28,19 +20,11 @@ export const handler = async (event) => {
             };
         }
 
-        if (!inputEvent?.principalId || typeof inputEvent.principalId !== "number") {
-            console.error("Validation failed: principalId must be a number");
+        if (!inputEvent?.principalId || inputEvent?.content === undefined) {
+            console.error("Validation failed: Missing required fields", inputEvent);
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "Invalid input: principalId must be a number" }),
-            };
-        }
-
-        if (!inputEvent?.content || typeof inputEvent.content !== "object") {
-            console.error("Validation failed: content must be an object");
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "Invalid input: content must be a map object" }),
+                body: JSON.stringify({ message: "Invalid input: principalId and content are required" }),
             };
         }
 
@@ -49,7 +33,7 @@ export const handler = async (event) => {
 
         const eventItem = {
             id: eventId,
-            principalId: inputEvent.principalId,
+            principalId: Number(inputEvent.principalId),
             createdAt,
             body: inputEvent.content,
         };
@@ -62,14 +46,10 @@ export const handler = async (event) => {
                 Item: eventItem,
             }));
         } catch (dbError) {
-            console.error("DynamoDB put error:", JSON.stringify(dbError, null, 2));
+            console.error("DynamoDB put error:", dbError);
             return {
                 statusCode: 500,
-                body: JSON.stringify({ 
-                    message: "Failed to save event to DynamoDB", 
-                    error: dbError.message,
-                    details: dbError 
-                }),
+                body: JSON.stringify({ message: "Failed to save event to DynamoDB", error: dbError.message }),
             };
         }
 
@@ -81,9 +61,11 @@ export const handler = async (event) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
+                statusCode: 201,
                 event: eventItem
             })
         };
+
 
     } catch (error) {
         console.error("Error processing request:", error);
