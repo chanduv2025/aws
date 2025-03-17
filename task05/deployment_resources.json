@@ -58,5 +58,11 @@
       }
     },
     "tags": {}
+  },
+  "lambda_topic": {
+    "resource_type": "sns_topic",
+    "region": "eu-west-1",
+    "event_sources": [],
+    "tags": {}
   }
 }
