@@ -2,7 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 
-const dynamoDBClient = new DynamoDBClient({ region: "eu-central-1" });
+const dynamoDBClient = new DynamoDBClient({ region: "eu-west-1" });
 const TABLE_NAME = process.env.TARGET_TABLE ;
 
 export const handler = async (event) => {
