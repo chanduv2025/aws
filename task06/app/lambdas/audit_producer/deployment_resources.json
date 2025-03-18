@@ -8,7 +8,6 @@
     "resource_type": "iam_role",
     "allowed_accounts": [
       "890742610830"
-    ],
-    "tags": {}
+    ]
   }
 }
