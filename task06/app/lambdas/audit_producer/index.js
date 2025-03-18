@@ -1,9 +1,12 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { v4 as uuidv4 } from "uuid";
+
+
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
-const dynamoDBClient = new DynamoDBClient({ region: "eu-central-1" });
+import { v4 as uuidv4 } from "uuid";
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
+
+const dynamoDBClient = new DynamoDBClient({ region: "eu-west-1" });
 const AUDIT_TABLE = process.env.TARGET_TABLE;
 
 export const handler = async (event) => {
