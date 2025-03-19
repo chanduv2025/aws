@@ -1,11 +1,11 @@
 {
-  "processor-role": {
+  "api_handler-role": {
     "predefined_policies": [],
     "principal_service": "lambda",
     "custom_policies": [
-      "task09Policy",
       "lambda-basic-execution"
     ],
-    "resource_type": "iam_role"
+    "resource_type": "iam_role",
+    "tags": {}
   }
 }
