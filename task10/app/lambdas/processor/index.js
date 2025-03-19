@@ -5,57 +5,60 @@ const { v4: uuidv4 } = require("uuid");
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.TARGET_TABLE || "Weather";
 
-const fetchWeatherData = async () => {
-    const endpoint = "https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&hourly=temperature_2m";
+async function fetchWeather() {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&hourly=temperature_2m";
 
     try {
-        const { data } = await axios.get(endpoint);
-        console.log("Weather data retrieved:", JSON.stringify(data, null, 2));
-        return data;
+        const response = await axios.get(url);
+        console.log("Fetched weather data:", JSON.stringify(response.data, null, 2));
+        return response.data;
     } catch (error) {
-        console.error("Error retrieving weather data:", error.message);
-        throw new Error("Unable to retrieve weather data");
+        console.error("Error fetching weather data:", error);
+        throw new Error("Failed to fetch weather data");
     }
-};
+}
 
 exports.handler = async (event) => {
-    console.log("Incoming event:", JSON.stringify(event, null, 2));
-
     try {
-        const weatherData = await fetchWeatherData();
+        console.log("Received event:", JSON.stringify(event, null, 2));
 
-        const record = {
+        const weatherData = await fetchWeather();
+
+        const item = {
             id: uuidv4(),
             forecast: {
                 latitude: weatherData.latitude,
                 longitude: weatherData.longitude,
-                generationTime: weatherData.generationtime_ms,
-                utcOffset: weatherData.utc_offset_seconds,
+                generationtime_ms: weatherData.generationtime_ms,
+                utc_offset_seconds: weatherData.utc_offset_seconds,
                 timezone: weatherData.timezone,
-                timezoneAbbreviation: weatherData.timezone_abbreviation,
+                timezone_abbreviation: weatherData.timezone_abbreviation,
                 elevation: weatherData.elevation,
-                hourlyUnits: weatherData.hourly_units,
-                hourlyData: weatherData.hourly
+                hourly_units: weatherData.hourly_units,
+                hourly: weatherData.hourly
             }
         };
 
-        console.log("Inserting record into DynamoDB:", JSON.stringify(record, null, 2));
+        console.log("Saving item to DynamoDB:", JSON.stringify(item, null, 2));
 
         await dynamoDB.put({
             TableName: TABLE_NAME,
-            Item: record
-        }).promise();
-
-        console.log("Record successfully inserted into DynamoDB");
+            Item: item
+        }).promise().then(() => {
+            console.log("Successfully inserted item into DynamoDB");
+        }).catch(err => {
+            console.error("DynamoDB put error:", err);
+            throw new Error("Failed to store data in DynamoDB");
+        });
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Weather data saved successfully!" }),
+            body: JSON.stringify({ message: "Weather data stored successfully!" }),
             headers: { "Content-Type": "application/json" }
         };
 
     } catch (error) {
-        console.error("Error handling request:", error.message);
+        console.error("Error processing request:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ message: "Internal Server Error", error: error.message }),
