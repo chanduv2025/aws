@@ -1,0 +1,1 @@
+syndicate generate meta dynamodb --resource_name Weather --hash_key_name Id --hash_key_type N --read_capacity 1 --write_capacity 1 
