@@ -1,54 +1,51 @@
-from abc import ABC, abstractmethod
-from commons import ApplicationException, create_response
+from abc import abstractmethod
+
+from commons import ApplicationException, build_response
 from commons.log_helper import get_logger
 
-logger = get_logger('abstract-lambda')
+_LOG = get_logger('abstract-lambda')
 
 
-class BaseLambda(ABC):
+class AbstractLambda:
 
     @abstractmethod
     def validate_request(self, event) -> dict:
         """
-        Validates incoming event attributes.
-        :param event: Lambda event data.
-        :return: Dictionary with attribute_name as key and error_message as value.
+        Validates event attributes
+        :param event: lambda incoming event
+        :return: dict with attribute_name in key and error_message in value
         """
         pass
 
     @abstractmethod
-    def process_request(self, event, context):
+    def handle_request(self, event, context):
         """
-        Business logic for handling the request.
-        :param event: Lambda event data.
-        :param context: Lambda execution context.
-        :return: Execution result.
+        Inherited lambda function code
+        :param event: lambda event
+        :param context: lambda context
+        :return:
         """
         pass
 
     def lambda_handler(self, event, context):
         try:
-            logger.debug(f"Incoming request: {event}")
-
-            # Ignore warm-up events
+            _LOG.debug(f'Request: {event}')
             if event.get('warm_up'):
-                return None
-
-            # Validate request
-            validation_errors = self.validate_request(event)
-            if validation_errors:
-                return create_response(data=validation_errors, status=400)
-
-            # Process request
-            result = self.process_request(event, context)
-            logger.debug(f"Response generated: {result}")
-
-            return result
-
-        except ApplicationException as exc:
-            logger.error(f"Application error; Event: {event}; Error: {exc}")
-            return create_response(data=exc.content, status=exc.code)
-
-        except Exception as exc:
-            logger.error(f"Unexpected error; Event: {event}; Error: {exc}")
-            return create_response(data="Internal server error", status=500)
+                return
+            errors = self.validate_request(event=event)
+            if errors:
+                return build_response(code=400,
+                                      content=errors)
+            execution_result = self.handle_request(event=event,
+                                                   context=context)
+            _LOG.debug(f'Response: {execution_result}')
+            return execution_result
+        except ApplicationException as e:
+            _LOG.error(f'Error occurred; Event: {event}; Error: {e}')
+            return build_response(code=e.code,
+                                  content=e.content)
+        except Exception as e:
+            _LOG.error(
+                f'Unexpected error occurred; Event: {event}; Error: {e}')
+            return build_response(code=500,
+                                  content='Internal server error')

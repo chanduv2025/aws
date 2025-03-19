@@ -1,26 +1,26 @@
 from commons.exception import ApplicationException
 
-HTTP_STATUS_BAD_REQUEST = 400
-HTTP_STATUS_UNAUTHORIZED = 401
-HTTP_STATUS_FORBIDDEN = 403
-HTTP_STATUS_NOT_FOUND = 404
-HTTP_STATUS_SUCCESS = 200
-HTTP_STATUS_SERVER_ERROR = 500
-HTTP_STATUS_NOT_IMPLEMENTED = 501
-HTTP_STATUS_SERVICE_UNAVAILABLE = 503
+RESPONSE_BAD_REQUEST_CODE = 400
+RESPONSE_UNAUTHORIZED = 401
+RESPONSE_FORBIDDEN_CODE = 403
+RESPONSE_RESOURCE_NOT_FOUND_CODE = 404
+RESPONSE_OK_CODE = 200
+RESPONSE_INTERNAL_SERVER_ERROR = 500
+RESPONSE_NOT_IMPLEMENTED = 501
+RESPONSE_SERVICE_UNAVAILABLE_CODE = 503
 
 
-def create_response(data, status=HTTP_STATUS_SUCCESS):
-    if status == HTTP_STATUS_SUCCESS:
+def build_response(content, code=200):
+    if code == RESPONSE_OK_CODE:
         return {
-            'status': status,
-            'data': data
+            'code': code,
+            'body': content
         }
     raise ApplicationException(
-        code=status,
-        content=data
+        code=code,
+        content=content
     )
 
 
-def trigger_error_response(status, message):
-    raise ApplicationException(code=status, content=message)
+def raise_error_response(code, content):
+    raise ApplicationException(code=code, content=content)
