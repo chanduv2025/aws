@@ -26,8 +26,7 @@
             "cognito-idp:ListUserPools",
             "cognito-idp:ListUserPoolClients",
             "cognito-idp:AdminRespondToAuthChallenge",
-            "cognito-idp:AdminConfirmSignUp",
-            "lambda:InvokeFunction"  
+            "cognito-idp:AdminConfirmSignUp"
           ],
           "Effect": "Allow",
           "Resource": "*"
@@ -122,29 +121,5 @@
       "index_document": "index.html",
       "error_document": "error.html"
     }
-  },
-  "api_gateway_resource_policy": {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": "*",
-        "Action": "execute-api:Invoke",
-        "Resource": "arn:aws:execute-api:<region>:<account_id>:<api_id>/*"
-      }
-    ]
-  },
-  "lambda_resource_policy": {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "apigateway.amazonaws.com"
-        },
-        "Action": "lambda:InvokeFunction",
-        "Resource": "arn:aws:lambda:<region>:<account_id>:function:<function_name>" 
-      }
-    ]
   }
 }
