@@ -1,43 +1,42 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as generateUUID } from 'uuid';
 
-// Get region from environment variables or use a default
-const REGION = 'eu-west-1';
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'uuid-storage';
+// Retrieve AWS region from environment variables or default to 'eu-west-1'
+const AWS_REGION = 'eu-west-1';
+const STORAGE_BUCKET = process.env.S3_BUCKET_NAME || 'uuid-storage';
 
-// Initialize S3 client with region
-const s3Client = new S3Client({ region: REGION });
+// Initialize the S3 client
+const s3 = new S3Client({ region: AWS_REGION });
 
 export const handler = async (event) => {
     try {
-        // Generate 10 random UUIDs
-        const uuids = Array(10).fill().map(() => uuidv4());
+        // Generate an array of 10 unique identifiers
+        const uuidList = Array.from({ length: 10 }, () => generateUUID());
 
-        // Create JSON payload with the UUIDs
-        const payload = {
-            ids: uuids
+        // Prepare data payload to be stored
+        const dataPayload = {
+            ids: uuidList
         };
 
-        // Generate filename based on current timestamp
-        const timestamp = new Date().toISOString();
-        const filename = timestamp;
+        // Create a filename based on the current timestamp
+        const fileKey = new Date().toISOString();
 
-        // Create the command for S3 upload
-        const command = new PutObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: filename,
-            Body: JSON.stringify(payload, null, 4),
+        // Set up S3 upload parameters
+        const uploadParams = new PutObjectCommand({
+            Bucket: STORAGE_BUCKET,
+            Key: fileKey,
+            Body: JSON.stringify(dataPayload, null, 4),
             ContentType: 'application/json'
         });
 
-        // Upload the file to S3
-        await s3Client.send(command);
+        // Upload data to S3 bucket
+        await s3.send(uploadParams);
 
-        console.log(`Successfully uploaded UUIDs to S3: s3://${BUCKET_NAME}/${filename}`);
+        console.log(`UUID data successfully uploaded to: s3://${STORAGE_BUCKET}/${fileKey}`);
 
-        // No return statement needed for CloudWatch event triggers
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
+        // No return value needed for CloudWatch-triggered functions
+    } catch (err) {
+        console.error('Upload error:', err);
+        throw err;
     }
 };

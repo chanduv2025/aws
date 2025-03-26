@@ -1,32 +1,32 @@
 import { util } from '@aws-appsync/utils';
 
 /**
- * Sends a request to the attached data source
- * @param {import('@aws-appsync/utils').Context} ctx the context
- * @returns {*} the request
+ * Constructs a request to interact with the connected data source.
+ * @param {import('@aws-appsync/utils').Context} ctx - The resolver context.
+ * @returns {*} The formatted request object.
  */
+
 export function request(ctx) {
-    const id = util.autoId(); // Generate UUID
-    const createdAt = util.time.nowISO8601(); // Generate timestamp
+    const uniqueId = util.autoId(); // Generate a unique identifier
+    const timestamp = util.time.nowISO8601(); // Capture the current timestamp
 
     return {
         operation: "PutItem",
-        key: { id: { S: id } },
+        key: { id: { S: uniqueId } },
         attributeValues: {
-            id: { S: id },
+            id: { S: uniqueId },
             userId: { N: ctx.args.userId.toString() },
-            createdAt: { S: createdAt },
-            payLoad: util.dynamodb.toMap(ctx.args.payLoad) // ✅ Store payLoad as a Map (M)
+            createdAt: { S: timestamp },
+            dataPayload: util.dynamodb.toMap(ctx.args.payLoad) // ✅ Convert payload into a DynamoDB Map (M)
         }
     };
 }
 
 /**
- * Returns the resolver result
- * @param {import('@aws-appsync/utils').Context} ctx the context
- * @returns {*} the result
+ * Processes and returns the resolver output.
+ * @param {import('@aws-appsync/utils').Context} ctx - The resolver context.
+ * @returns {*} The transformed response.
  */
 export function response(ctx) {
     return ctx.result ? util.dynamodb.toMap(ctx.result) : null;
 }
-

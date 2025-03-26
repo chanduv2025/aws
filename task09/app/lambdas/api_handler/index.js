@@ -1,30 +1,31 @@
-const axios = require("axios"); // Ensure this is in the Lambda Layer or package.json
+const axios = require("axios"); // Ensure this is included in Lambda Layer or package.json
 
 exports.handler = async (event) => {
-    console.log("Received event:", JSON.stringify(event, null, 2));
+    console.log("Incoming request:", JSON.stringify(event, null, 2));
 
-    const path = event?.rawPath || "/";
-    const method = event?.requestContext?.http?.method || "GET";
+    const requestPath = event?.rawPath || "/";
+    const httpMethod = event?.requestContext?.http?.method || "GET";
 
-    if (method === "GET" && path === "/weather") {
+    if (httpMethod === "GET" && requestPath === "/weather") {
         try {
-            const response = await axios.get("https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m&current_weather=true");
+            const weatherApiUrl = "https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m&current_weather=true";
+            const weatherResponse = await axios.get(weatherApiUrl);
 
             return {
                 statusCode: 200,
-                body: JSON.stringify(response.data),
+                body: JSON.stringify(weatherResponse.data),
                 headers: {
-                    "content-type": "application/json"
+                    "Content-Type": "application/json"
                 },
                 isBase64Encoded: false
             };
-        } catch (error) {
-            console.error("Error fetching weather data:", error);
+        } catch (err) {
+            console.error("Failed to retrieve weather information:", err);
             return {
                 statusCode: 500,
-                body: JSON.stringify({ message: "Internal Server Error" }),
+                body: JSON.stringify({ message: "Server encountered an error" }),
                 headers: {
-                    "content-type": "application/json"
+                    "Content-Type": "application/json"
                 },
                 isBase64Encoded: false
             };
@@ -34,10 +35,10 @@ exports.handler = async (event) => {
             statusCode: 400,
             body: JSON.stringify({
                 statusCode: 400,
-                message: `Bad request syntax or unsupported method. Request path: ${path}. HTTP method: ${method}`
+                message: `Invalid request method or path. Requested path: ${requestPath}. HTTP method: ${httpMethod}`
             }),
             headers: {
-                "content-type": "application/json"
+                "Content-Type": "application/json"
             },
             isBase64Encoded: false
         };

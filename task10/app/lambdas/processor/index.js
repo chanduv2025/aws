@@ -3,65 +3,65 @@ const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
-const TABLE_NAME = process.env.TARGET_TABLE || "Weather";
+const WEATHER_TABLE = process.env.TARGET_TABLE || "WeatherData";
 
-async function fetchWeather() {
-    const url = "https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&hourly=temperature_2m";
+async function retrieveWeatherData() {
+    const weatherApiUrl = "https://api.open-meteo.com/v1/forecast?latitude=50.4375&longitude=30.5&hourly=temperature_2m";
 
     try {
-        const response = await axios.get(url);
-        console.log("Fetched weather data:", JSON.stringify(response.data, null, 2));
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching weather data:", error);
-        throw new Error("Failed to fetch weather data");
+        const weatherResponse = await axios.get(weatherApiUrl);
+        console.log("Retrieved weather details:", JSON.stringify(weatherResponse.data, null, 2));
+        return weatherResponse.data;
+    } catch (err) {
+        console.error("Error retrieving weather information:", err);
+        throw new Error("Unable to fetch weather data");
     }
 }
 
 exports.handler = async (event) => {
     try {
-        console.log("Received event:", JSON.stringify(event, null, 2));
+        console.log("Incoming event data:", JSON.stringify(event, null, 2));
 
-        const weatherData = await fetchWeather();
+        const weatherDetails = await retrieveWeatherData();
 
-        const item = {
+        const record = {
             id: uuidv4(),
             forecast: {
-                latitude: weatherData.latitude,
-                longitude: weatherData.longitude,
-                generationtime_ms: weatherData.generationtime_ms,
-                utc_offset_seconds: weatherData.utc_offset_seconds,
-                timezone: weatherData.timezone,
-                timezone_abbreviation: weatherData.timezone_abbreviation,
-                elevation: weatherData.elevation,
-                hourly_units: weatherData.hourly_units,
-                hourly: weatherData.hourly
+                latitude: weatherDetails.latitude,
+                longitude: weatherDetails.longitude,
+                generationTime: weatherDetails.generationtime_ms,
+                utcOffset: weatherDetails.utc_offset_seconds,
+                timezone: weatherDetails.timezone,
+                timezoneAbbr: weatherDetails.timezone_abbreviation,
+                elevation: weatherDetails.elevation,
+                hourlyUnits: weatherDetails.hourly_units,
+                hourlyData: weatherDetails.hourly
             }
         };
 
-        console.log("Saving item to DynamoDB:", JSON.stringify(item, null, 2));
+        console.log("Storing weather record in DynamoDB:", JSON.stringify(record, null, 2));
 
         await dynamoDB.put({
-            TableName: TABLE_NAME,
-            Item: item
+            TableName: WEATHER_TABLE,
+            Item: record
         }).promise().then(() => {
-            console.log("Successfully inserted item into DynamoDB");
-        }).catch(err => {
-            console.error("DynamoDB put error:", err);
-            throw new Error("Failed to store data in DynamoDB");
+            console.log("Data successfully stored in DynamoDB");
+        }).catch(error => {
+            console.error("Error saving data to DynamoDB:", error);
+            throw new Error("Failed to write weather information to database");
         });
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Weather data stored successfully!" }),
+            body: JSON.stringify({ message: "Weather data successfully saved!" }),
             headers: { "Content-Type": "application/json" }
         };
 
-    } catch (error) {
-        console.error("Error processing request:", error);
+    } catch (err) {
+        console.error("Error handling request:", err);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "Internal Server Error", error: error.message }),
+            body: JSON.stringify({ message: "Server Error", error: err.message }),
             headers: { "Content-Type": "application/json" }
         };
     }
